@@ -1,0 +1,132 @@
+<html>
+<head>
+    <title>S3 POST Form</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <script src="base64.js"></script>
+    <script>
+        function b64_to_utf8( str ) {
+            return decodeURIComponent(escape(window.atob( encodeURIComponent(str) )));
+        }
+
+        /**
+         * @param {string} id
+         */
+        function $(id) {
+            return document.getElementById(id);
+        }
+
+        window.onload = function () {
+            var imgData = $("example").src.replace(/^data:image\/\w+;base64,/, "") + "\n";
+
+            $("upload").addEventListener("click", function (e) {
+                var request = new XMLHttpRequest();
+                var boundary = "------WebKitFormBoundary4wUZambBdU5wgTJM";
+
+                /*var data = "";
+
+                data += boundary + "\r\n";
+                data += "Content-Disposition: form-data; name=\"key\"\r\n\r\n";
+
+                data += "uploads/${filename}\r\n";
+                data += boundary + "\r\n";
+                data += "Content-Disposition: form-data; name=\"AWSAccessKeyId\"\r\n\r\n";
+
+                data += "AKIAJWT3W6BKEXJKPDDA\r\n";
+                data += boundary + "\r\n";
+                data += "Content-Disposition: form-data; name=\"acl\"\r\n\r\n";
+
+                data += "public-read\r\n";
+                data += boundary + "\r\n";
+                data += "Content-Disposition: form-data; name=\"success_action_redirect\"\r\n\r\n";
+
+                data += "http://localhost:8000/\r\n";
+                data += boundary + "\r\n";
+                data += "Content-Disposition: form-data; name=\"policy\"\r\n\r\n";
+
+                data += "eyJleHBpcmF0aW9uIjoiMjAxMy0wMS0wMVQwMDowMDowMFoiLCJjb25kaXRpb25zIjpbeyJidWNrZXQiOiJjby5waG90YXRvLnJhd2ltYWdlcyJ9LFsic3RhcnRzLXdpdGgiLCIka2V5IiwidXBsb2Fkcy8iXSx7ImFjbCI6InB1YmxpYy1yZWFkIn0seyJzdWNjZXNzX2FjdGlvbl9yZWRpcmVjdCI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODAwMC8ifSxbInN0YXJ0cy13aXRoIiwiJENvbnRlbnQtVHlwZSIsImltYWdlL3BuZyJdLFsiY29udGVudC1sZW5ndGgtcmFuZ2UiLDAsMTA0ODU3Nl1dfQ==\r\n";
+                data += boundary + "\r\n";
+                data += "Content-Disposition: form-data; name=\"Content-Type\"\r\n\r\n";
+
+                data += "image/png\r\n";
+                data += boundary + "\r\n";
+                data += "Content-Disposition: form-data; name=\"signature\"\r\n\r\n";
+
+                data += "1sL+NA1ua53qZfinaXFTUi5L+wI=\r\n";
+                data += boundary + "\r\n";
+                data += "Content-Disposition: form-data; name=\"file\"\r\n";
+                data += "Content-Type: image/png\r\n";
+                data += "Content-Transfer-Encoding: base64\r\n\r\n";
+
+                data += b64_to_utf8(imgData)+"\r\n";
+
+                data += boundary + "--\r\n";*/
+
+                //decode the base64 binary into am ArrayBuffer
+                var barray = Base64Binary.decodeArrayBuffer(imgData);
+                var blob = new Blob([barray], {type: "image/png"});
+
+                //pass post params through FormData
+                var formdata = new FormData();
+
+                var params = {
+                    key: "uploads/${filename}",
+                    AWSAccessKeyId: "AKIAJWT3W6BKEXJKPDDA",
+                    acl: "public-read",
+                    success_action_redirect: "http://localhost:8000/",
+                    policy: "eyJleHBpcmF0aW9uIjoiMjAxMy0wMS0wMVQwMDowMDowMFoiLCJjb25kaXRpb25zIjpbeyJidWNrZXQiOiJjby5waG90YXRvLnJhd2ltYWdlcyJ9LFsic3RhcnRzLXdpdGgiLCIka2V5IiwidXBsb2Fkcy8iXSx7ImFjbCI6InB1YmxpYy1yZWFkIn0seyJzdWNjZXNzX2FjdGlvbl9yZWRpcmVjdCI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODAwMC8ifSxbInN0YXJ0cy13aXRoIiwiJENvbnRlbnQtVHlwZSIsImltYWdlL3BuZyJdLFsiY29udGVudC1sZW5ndGgtcmFuZ2UiLDAsMTA0ODU3Nl1dfQ==",
+                    signature: "1sL+NA1ua53qZfinaXFTUi5L+wI=",
+                    "Content-Type": "image/png",
+                    file: blob
+                }
+
+                for (var key in params) {
+                    if (!params.hasOwnProperty(key))
+                        return;
+
+                    formdata.append(key, params[key]);
+                }
+
+                request.open("post", "http://co.photato.rawimages.s3.amazonaws.com/", false);
+                //request.open("post", "http://localhost:5000/upload", false);
+                //request.setRequestHeader("Content-Type","multipart/form-data; boundary="+boundary.substring(2));
+                //request.setRequestHeader("Content-Transfer-Encoding", "base64");
+                request.send(formdata);
+                //request.send(data);
+            });
+        };
+
+        window.onunload = function() {
+            console.log("tere");
+        }
+    </script>
+</head>
+
+<body>
+
+Policy:
+
+"{\"expiration\":\"2013-01-01T00:00:00Z\",\"conditions\":[{\"bucket\":\"co.photato.rawimages\"},[\"starts-with\",\"$key\",\"uploads/\"],{\"acl\":\"public-read\"},{\"success_action_redirect\":\"http://localhost:8000/\"},[\"starts-with\",\"$Content-Type\",\"image/png\"],[\"content-length-range\",0,1048576]]}"
+
+
+<!--<form action="http://localhost:5000/upload"-->
+<form action="http://co.photato.rawimages.s3.amazonaws.com/"
+      method="post" enctype="multipart/form-data">
+    <input type="hidden" name="key" value="uploads/${filename}">
+    <input type="hidden" name="AWSAccessKeyId" value="AKIAJWT3W6BKEXJKPDDA">
+    <input type="hidden" name="acl" value="public-read">
+    <input type="hidden" name="success_action_redirect" value="http://localhost:8000/">
+    <input type="hidden" name="policy" value="eyJleHBpcmF0aW9uIjoiMjAxMy0wMS0wMVQwMDowMDowMFoiLCJjb25kaXRpb25zIjpbeyJidWNrZXQiOiJjby5waG90YXRvLnJhd2ltYWdlcyJ9LFsic3RhcnRzLXdpdGgiLCIka2V5IiwidXBsb2Fkcy8iXSx7ImFjbCI6InB1YmxpYy1yZWFkIn0seyJzdWNjZXNzX2FjdGlvbl9yZWRpcmVjdCI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODAwMC8ifSxbInN0YXJ0cy13aXRoIiwiJENvbnRlbnQtVHlwZSIsImltYWdlL3BuZyJdLFsiY29udGVudC1sZW5ndGgtcmFuZ2UiLDAsMTA0ODU3Nl1dfQ==">
+    <input type="hidden" name="signature" value="1sL+NA1ua53qZfinaXFTUi5L+wI=">
+    <input type="hidden" name="Content-Type" value="image/png">
+
+    File to upload to S3:
+    <input name="file" type="file">
+    <br>
+    <input type="submit" value="Upload File to S3">
+</form>
+
+<button id="upload">Upload</button>
+<img id="example" src="data:image/png;base64,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" />
+
+</body>
+</html>
